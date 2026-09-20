@@ -20,7 +20,7 @@ import Gio from "gi://Gio";
 import GObject from "gi://GObject";
 import St from "gi://St";
 import Clutter from "gi://Clutter";
-import Soup from "gi://Soup?version=3.0";
+import Soup from "gi://Soup";
 import GLib from "gi://GLib";
 
 import {
@@ -187,7 +187,6 @@ export default class HackastatsExtension extends Extension {
       GLib.Source.remove(this._timer);
       this._timer = null;
     }
-    if (!this._settings || !this._indicator) return;
 
     const interval = this._settings.get_int("refresh-interval");
     this._timer = GLib.timeout_add_seconds(
