@@ -197,18 +197,17 @@ export default class HackastatsExtension extends Extension {
 
     this._settings = this.getSettings();
 
-    this._handlerIds = [
-      this._settings.connect("changed::api-key", () =>
-        this._indicator?.refresh(),
-      ),
-      this._settings.connect("changed::base-url", () =>
-        this._indicator?.refresh(),
-      ),
-      this._settings.connect("changed::refresh-interval", () =>
-        this._restartTimer(),
-      ),
-      this._settings.connect("changed::position", () => this._reposition()),
-    ];
+    this._settings.connectObject(
+      "changed::api-key",
+      () => this._indicator?.refresh(),
+      "changed::base-url",
+      () => this._indicator?.refresh(),
+      "changed::refresh-interval",
+      () => this._restartTimer(),
+      "changed::position",
+      () => this._reposition(),
+      this,
+    );
 
     this._reposition();
 
@@ -223,10 +222,7 @@ export default class HackastatsExtension extends Extension {
 
     this._indicator?.destroy();
     this._indicator = null;
-    if (this._settings && this._handlerIds) {
-      for (const id of this._handlerIds) this._settings.disconnect(id);
-    }
-    this._handlerIds = null;
+    this._settings?.disconnectObject(this);
     this._settings = null;
     this._session?.abort();
     this._session = null;
