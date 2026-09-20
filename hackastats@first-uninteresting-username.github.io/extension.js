@@ -32,7 +32,6 @@ import * as PanelMenu from "resource:///org/gnome/shell/ui/panelMenu.js";
 import * as Main from "resource:///org/gnome/shell/ui/main.js";
 
 async function getToday(session, baseUrl, apiKey, cancellable) {
-  // Create a request
   const message = Soup.Message.new(
     "GET",
     `${baseUrl}/users/current/statusbar/today?api_key=${apiKey}`,
@@ -44,28 +43,22 @@ async function getToday(session, baseUrl, apiKey, cancellable) {
     cancellable,
   );
 
-  // Error on non ok http response codes
   if (message.get_status() !== Soup.Status.OK)
     throw new Error(`HTTP ${message.get_status()}`);
 
-  // Convert bytes to json
   const text = new TextDecoder().decode(bytes.get_data());
   const json = JSON.parse(text);
-  // https://wakatime.com/developers#status_bar or https://hackatime.hackclub.com/api-docs#tag/wakatime-compatibility/GET/api/hackatime/v1/users/{id}/statusbar/today
   return json.data.grand_total.text;
 }
 
-// Position on the panel
 function getPosition(positionInt) {
   if (positionInt === 0) {
     return {
-      // Rightmost on the left side
       position: "left",
       index: -1,
     };
   } else if (positionInt === 1) {
     return {
-      // Leftmost on the center
       position: "center",
       index: 0,
     };
@@ -76,7 +69,6 @@ function getPosition(positionInt) {
   };
 }
 
-// Check if the file has some key
 function hasKey(keyFile, group, key) {
   try {
     keyFile.get_value(group, key);
@@ -95,9 +87,7 @@ const Indicator = GObject.registerClass(
       this._session = session;
       this._cancellable = new Gio.Cancellable();
       this._label = new St.Label({
-        // Displayed before first fetch
         text: "Loading...",
-        // Align to the center of the box
         x_align: Clutter.ActorAlign.CENTER,
         y_align: Clutter.ActorAlign.CENTER,
       });
@@ -105,7 +95,6 @@ const Indicator = GObject.registerClass(
       this.add_child(this._label);
       this.refresh();
     }
-    // Refresh panel
     async refresh() {
       this._cancellable?.cancel();
       this._cancellable = new Gio.Cancellable();
@@ -114,12 +103,10 @@ const Indicator = GObject.registerClass(
       let apiKey, baseUrl;
 
       try {
-        // Get ~/.wakatime.cfg
         const home = GLib.get_home_dir();
         const configFile = new GLib.KeyFile();
         const filePath = `${home}/.wakatime.cfg`;
 
-        // Load ~/.wakatime.cfg
         let haveFile = true;
         try {
           configFile.load_from_file(filePath, GLib.KeyFileFlags.NONE);
@@ -127,21 +114,18 @@ const Indicator = GObject.registerClass(
           haveFile = false;
         }
 
-        // Assign api key
         if (haveFile && hasKey(configFile, "settings", "api_key")) {
           apiKey = configFile.get_string("settings", "api_key");
         } else {
           apiKey = this._settings.get_string("api-key");
         }
 
-        // Assign base url
         if (haveFile && hasKey(configFile, "settings", "api_url")) {
           baseUrl = configFile.get_string("settings", "api_url");
         } else {
           baseUrl = this._settings.get_string("base-url");
         }
 
-        // Get today stats
         const text = await getToday(
           this._session,
           baseUrl,
@@ -159,11 +143,8 @@ const Indicator = GObject.registerClass(
           return;
         console.error("Hackastats", e);
         if (apiKey == "") {
-          // Display that message when API key isn't configured
           this._label?.set_text("No API key");
         } else {
-          // Display that message when there's no connection to the server or api key/base url is declared in a wrong way
-          // Might be unhelpful
           this._label?.set_text("Server unavailable");
         }
       }
@@ -181,7 +162,6 @@ const Indicator = GObject.registerClass(
 );
 
 export default class HackastatsExtension extends Extension {
-  // Restart (or enable) the timer that refreshes the data
   _restartTimer() {
     if (this._timer) {
       GLib.Source.remove(this._timer);
@@ -199,17 +179,14 @@ export default class HackastatsExtension extends Extension {
     );
   }
 
-  // Add the indicator to the panel
   _reposition() {
     if (!this._settings || !this._session) return;
 
-    // Destroy the indicator if it exists
     if (this._indicator) {
       this._indicator.destroy();
       this._indicator = null;
     }
 
-    // Create the indicator
     const { position, index } = getPosition(this._settings.get_int("position"));
     this._indicator = new Indicator(this._settings, this._session);
     Main.panel.addToStatusArea(this.uuid, this._indicator, index, position);
@@ -220,7 +197,6 @@ export default class HackastatsExtension extends Extension {
 
     this._settings = this.getSettings();
 
-    // Refresh things when dconf is changed
     this._handlerIds = [
       this._settings.connect("changed::api-key", () =>
         this._indicator?.refresh(),
@@ -240,7 +216,6 @@ export default class HackastatsExtension extends Extension {
   }
 
   disable() {
-    // Delete the timer
     if (this._timer) {
       GLib.Source.remove(this._timer);
       this._timer = null;
@@ -248,7 +223,6 @@ export default class HackastatsExtension extends Extension {
 
     this._indicator?.destroy();
     this._indicator = null;
-    // Close the process that refreshes things in reaction to dconf changes
     if (this._settings && this._handlerIds) {
       for (const id of this._handlerIds) this._settings.disconnect(id);
     }
