@@ -29,6 +29,34 @@ Once approved:
 2. Flip the switch to `ON` and confirm the installation.
 3. Alternatively, in the [Extension Manager](https://github.com/mjakeman/extension-manager) app, search for `Hackastats` under _Browse_ and click _Install_.
 
+### Nix and NixOS
+
+Build the package with `nix build .#hackastats` (or `nix build`, which uses the same
+package). The flake supports `x86_64-linux` and `aarch64-linux`.
+
+For a NixOS flake, add this input:
+
+```nix
+hackastats = {
+  url = "github:first-uninteresting-username/hackastats";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
+```
+
+With Home Manager, install and enable the extension:
+
+```nix
+programs.gnome-shell = {
+  enable = true;
+  extensions = [
+    { package = inputs.hackastats.packages.${pkgs.stdenv.hostPlatform.system}.default; }
+  ];
+};
+```
+
+Log out and back in after rebuilding. Configure the server and credentials as
+explained below; the package contains no credentials.
+
 ### Standalone
 
 #### From a release bundle
