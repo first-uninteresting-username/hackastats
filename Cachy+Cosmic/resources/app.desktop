@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=HackaStats
+Comment=Display today's Hackatime coding time in the COSMIC panel
+Type=Application
+Icon=io.github.first_uninteresting_username.Hackastats
+Exec=cosmic-applet-hackastats
+Terminal=false
+StartupNotify=true
+Categories=COSMIC;Development;
+Keywords=Hackatime;WakaTime;coding;time;statistics;COSMIC;
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicHoverPopup=Auto

@@ -1,0 +1,42 @@
+[package]
+name = "cosmic-applet-hackastats"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.93"
+license = "GPL-2.0-or-later"
+description = "Display today's Hackatime coding time in the COSMIC panel"
+repository = "https://github.com/first-uninteresting-username/hackastats"
+
+[build-dependencies]
+xdgen = "0.1"
+
+[dependencies]
+base64 = "0.22"
+i18n-embed-fl = "0.10"
+rust-embed = "8.11"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1.52", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[dependencies.i18n-embed]
+version = "0.16"
+features = ["fluent-system", "desktop-requester"]
+
+[dependencies.reqwest]
+version = "0.12"
+default-features = false
+features = ["json", "rustls-tls"]
+
+[dependencies.libcosmic]
+git = "https://github.com/pop-os/libcosmic.git"
+features = [
+    "applet",
+    "applet-token",
+    "dbus-config",
+    "multi-window",
+    "tokio",
+    "wayland",
+    "winit",
+]

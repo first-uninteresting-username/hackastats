@@ -1,0 +1,2 @@
+- `install-user.sh`: Builds and installs applet.
+- `uninstall-user.sh`: Removes installed applet files.
